@@ -2,14 +2,18 @@
  * Unit tests for the authentication controller
  */
 
+import { jest } from '@jest/globals';
 import { authController } from '../../../src/controllers/authController.js';
 import { userModel } from '../../../src/models/userModel.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
-jest.mock('../../../src/models/userModel.js');
-jest.mock('bcrypt');
-jest.mock('jsonwebtoken');
+jest.spyOn(userModel, 'findByEmail').mockImplementation(() => jest.fn());
+jest.spyOn(userModel, 'create').mockImplementation(() => jest.fn());
+jest.spyOn(bcrypt, 'genSalt').mockImplementation(() => jest.fn());
+jest.spyOn(bcrypt, 'hash').mockImplementation(() => jest.fn());
+jest.spyOn(bcrypt, 'compare').mockImplementation(() => jest.fn());
+jest.spyOn(jwt, 'sign').mockImplementation(() => jest.fn());
 
 describe('Auth Controller', () => {
   let req;
