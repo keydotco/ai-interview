@@ -8,6 +8,13 @@ import { taskService } from '../../../src/services/taskService.js';
 
 jest.mock('../../../src/services/taskService.js');
 
+taskService.getAllTasks = jest.fn();
+taskService.getTaskById = jest.fn();
+taskService.searchTasks = jest.fn();
+taskService.createTask = jest.fn();
+taskService.updateTask = jest.fn();
+taskService.deleteTask = jest.fn();
+
 describe('Task Controller', () => {
   let req;
   let res;

@@ -8,6 +8,12 @@ import { taskModel } from '../../../src/models/taskModel.js';
 
 jest.mock('../../../src/models/taskModel.js');
 
+taskModel.findAll = jest.fn();
+taskModel.findById = jest.fn();
+taskModel.create = jest.fn();
+taskModel.update = jest.fn();
+taskModel.delete = jest.fn();
+
 describe('Task Service', () => {
   beforeEach(() => {
     jest.clearAllMocks();
