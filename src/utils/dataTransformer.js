@@ -40,16 +40,16 @@ export class DataTransformer {
     }
     
     switch (format) {
-      case 'iso':
-        return d.toISOString();
-      case 'timestamp':
-        return d.getTime();
-      case 'unix':
-        return Math.floor(d.getTime() / 1000);
-      case 'ymd':
-        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-      default:
-        return d.toISOString();
+    case 'iso':
+      return d.toISOString();
+    case 'timestamp':
+      return d.getTime();
+    case 'unix':
+      return Math.floor(d.getTime() / 1000);
+    case 'ymd':
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    default:
+      return d.toISOString();
     }
   }
   
