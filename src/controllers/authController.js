@@ -3,12 +3,38 @@
  */
 
 import jwt from 'jsonwebtoken';
-import argon2 from 'argon2';
+import crypto from 'crypto';
 import { userModel } from '../models/userModel.js';
 import { logger } from '../utils/logger.js';
 import { loadConfig } from '../utils/config.js';
 
 const config = loadConfig();
+
+// Crypto configuration
+const iterations = 16000;
+const keylen = 64;
+
+// Hash password using scrypt
+const hashPassword = (password) => {
+  return new Promise((resolve, reject) => {
+    const salt = crypto.randomBytes(16).toString('hex');
+    crypto.scrypt(password, salt, keylen, { N: iterations }, (err, derivedKey) => {
+      if (err) reject(err);
+      resolve(salt + ':' + derivedKey.toString('hex'));
+    });
+  });
+};
+
+// Verify password against hashed version
+const verifyPassword = (hashedPassword, password) => {
+  return new Promise((resolve, reject) => {
+    const [salt, key] = hashedPassword.split(':');
+    crypto.scrypt(password, salt, keylen, { N: iterations }, (err, derivedKey) => {
+      if (err) reject(err);
+      resolve(key === derivedKey.toString('hex'));
+    });
+  });
+};
 
 export const authController = {
   register: async (req, res, next) => {
@@ -28,7 +54,7 @@ export const authController = {
         throw error;
       }
       
-      const hashedPassword = await argon2.hash(password);
+      const hashedPassword = await hashPassword(password);
       
       const newUser = await userModel.create({
         name,
@@ -73,7 +99,7 @@ export const authController = {
       }
       
       try {
-        const isMatch = await argon2.verify(user.password, password);
+        const isMatch = await verifyPassword(user.password, password);
         if (!isMatch) {
           const error = new Error('Invalid credentials');
           error.statusCode = 401;

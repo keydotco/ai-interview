@@ -5,13 +5,16 @@
 import { jest } from '@jest/globals';
 import { authController } from '../../../src/controllers/authController.js';
 import { userModel } from '../../../src/models/userModel.js';
-import argon2 from 'argon2';
+import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 
 jest.spyOn(userModel, 'findByEmail').mockImplementation(() => jest.fn());
 jest.spyOn(userModel, 'create').mockImplementation(() => jest.fn());
-jest.spyOn(argon2, 'hash').mockImplementation(() => jest.fn());
-jest.spyOn(argon2, 'verify').mockImplementation(() => jest.fn());
+jest.spyOn(crypto, 'randomBytes').mockImplementation(() => Buffer.from('mocksalt'));
+jest.spyOn(crypto, 'scrypt').mockImplementation((password, salt, keylen, options, callback) => {
+  // Mock implementation that simulates successful hashing
+  callback(null, Buffer.from('mockderivedkey'));
+});
 jest.spyOn(jwt, 'sign').mockImplementation(() => jest.fn());
 
 describe('Auth Controller', () => {
@@ -40,7 +43,7 @@ describe('Auth Controller', () => {
         password: 'password123'
       };
       
-      const hashedPassword = 'hashed_password';
+      const hashedPassword = 'mocksalt:mockderivedkey';
       const newUser = {
         id: '123',
         name: 'Test User',
@@ -53,18 +56,19 @@ describe('Auth Controller', () => {
       req.body = userData;
       
       userModel.findByEmail.mockResolvedValue(null);
-      argon2.hash.mockResolvedValue(hashedPassword);
+      crypto.randomBytes.mockReturnValue(Buffer.from('mocksalt', 'hex'));
       userModel.create.mockResolvedValue(newUser);
       jwt.sign.mockReturnValue(token);
       
       await authController.register(req, res, next);
       
       expect(userModel.findByEmail).toHaveBeenCalledWith(userData.email);
-      expect(argon2.hash).toHaveBeenCalledWith(userData.password);
+      expect(crypto.randomBytes).toHaveBeenCalledWith(16);
+      expect(crypto.scrypt).toHaveBeenCalled();
       expect(userModel.create).toHaveBeenCalledWith({
         name: userData.name,
         email: userData.email,
-        password: hashedPassword,
+        password: expect.any(String),
         role: 'user'
       });
       expect(jwt.sign).toHaveBeenCalled();
@@ -118,7 +122,7 @@ describe('Auth Controller', () => {
         id: '123',
         name: 'Test User',
         email: 'test@example.com',
-        password: 'hashed_password',
+        password: 'salt:hashedpassword',
         role: 'user'
       };
       const token = 'jwt_token';
@@ -126,13 +130,16 @@ describe('Auth Controller', () => {
       req.body = credentials;
       
       userModel.findByEmail.mockResolvedValue(user);
-      argon2.verify.mockResolvedValue(true);
+      // Mock successful password verification by ensuring scrypt returns the expected hash
+      crypto.scrypt.mockImplementation((password, salt, keylen, options, callback) => {
+        callback(null, Buffer.from('hashedpassword', 'hex'));
+      });
       jwt.sign.mockReturnValue(token);
       
       await authController.login(req, res, next);
       
       expect(userModel.findByEmail).toHaveBeenCalledWith(credentials.email);
-      expect(argon2.verify).toHaveBeenCalledWith(user.password, credentials.password);
+      expect(crypto.scrypt).toHaveBeenCalled();
       expect(jwt.sign).toHaveBeenCalled();
       expect(res.json).toHaveBeenCalledWith({
         id: user.id,
@@ -179,13 +186,16 @@ describe('Auth Controller', () => {
       const user = {
         id: '123',
         email: 'test@example.com',
-        password: 'hashed_password'
+        password: 'salt:correcthash'
       };
       
       req.body = credentials;
       
       userModel.findByEmail.mockResolvedValue(user);
-      argon2.verify.mockResolvedValue(false);
+      // Mock failed password verification by returning a different hash
+      crypto.scrypt.mockImplementation((password, salt, keylen, options, callback) => {
+        callback(null, Buffer.from('wronghash', 'hex'));
+      });
       
       await authController.login(req, res, next);
       

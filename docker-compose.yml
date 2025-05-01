@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   app:
+    platform: linux/amd64 # Need this if on M1 macbook
     build: .
     ports:
       - "3000:3000"
