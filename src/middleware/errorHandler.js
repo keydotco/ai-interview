@@ -4,7 +4,7 @@
 
 import { logger } from '../utils/logger.js';
 
-export const errorHandler = (err, req, res) => {
+export const errorHandler = (err, req, res, next) => {
   logger.error('Error occurred:', err);
 
   const statusCode = err.statusCode || 500;
@@ -20,5 +20,9 @@ export const errorHandler = (err, req, res) => {
     errorResponse.error.stack = err.stack;
   }
 
-  res.status(statusCode).json(errorResponse);
+  try {
+    res.status(statusCode).json(errorResponse);
+  } catch (error) {
+    next(error);
+  }
 };

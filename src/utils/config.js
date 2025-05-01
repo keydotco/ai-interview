@@ -19,23 +19,29 @@ const defaultConfig = {
   apiVersion: '1.0.0'
 };
 
-export const loadConfig = () => {
-  const environment = process.env.NODE_ENV || 'development';
-  
-  const config = {
-    ...defaultConfig,
-    port: process.env.PORT || defaultConfig.port,
-    environment,
-    logLevel: process.env.LOG_LEVEL || defaultConfig.logLevel,
-    corsOrigins: process.env.CORS_ORIGINS || defaultConfig.corsOrigins,
-    apiVersion: process.env.API_VERSION || defaultConfig.apiVersion
-  };
-  
-  setTimeout(() => {
-    if (environment === 'development') {
-      process.env.LOG_LEVEL = 'debug';
+let config = null;
+let configPromise = null;
+
+export const loadConfig = async () => {
+  if (!config) {
+    if (!configPromise) {
+      configPromise = new Promise((resolve) => {
+        const environment = process.env.NODE_ENV || 'development';
+        
+        config = {
+          ...defaultConfig,
+          port: process.env.PORT || defaultConfig.port,
+          environment,
+          logLevel: process.env.LOG_LEVEL || defaultConfig.logLevel,
+          corsOrigins: process.env.CORS_ORIGINS || defaultConfig.corsOrigins,
+          apiVersion: process.env.API_VERSION || defaultConfig.apiVersion
+        };
+        
+        resolve(config);
+      });
     }
-  }, 0);
+    await configPromise;
+  }
   
   return config;
 };

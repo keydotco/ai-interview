@@ -21,6 +21,10 @@ export const taskModel = {
   },
 
   create: async (taskData) => {
+    if (!taskData.title || !taskData.userId) {
+      throw new Error('Title and userId are required fields');
+    }
+    
     const newTask = {
       id: uuidv4(),
       title: taskData.title,

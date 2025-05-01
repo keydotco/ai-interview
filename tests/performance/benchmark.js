@@ -4,13 +4,17 @@
  * This utility provides tools for benchmarking the performance of API endpoints
  * and functions in the application. It uses autocannon for HTTP benchmarking
  * and provides utilities for measuring function execution time.
+ * 
+ * Run this file to benchmark the performance routes:
+ * node tests/performance/benchmark.js
  */
 
 import autocannon from 'autocannon';
 import { promisify } from 'util';
-import { writeFile } from 'fs/promises';
+import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -218,3 +222,183 @@ export const benchmarkCaching = async (uncachedFn, cachedFn, args = [], iteratio
     }
   };
 };
+
+/**
+ * Display HTTP benchmark results in a readable format
+ * @param {string} name - Name of the benchmark
+ * @param {Object} results - Results from runHttpBenchmark
+ */
+const displayHttpResults = (name, results) => {
+  console.log(`\n📊 ${name} Results:`);
+  console.log(`  Requests: ${results.requests.total}`);
+  console.log(`  Throughput: ${results.requests.average} req/sec`);
+  console.log(`  Latency (avg): ${results.latency.average.toFixed(2)}ms`);
+  console.log(`  Latency (min): ${results.latency.min}ms`);
+  console.log(`  Latency (max): ${results.latency.max}ms`);
+  console.log(`  Errors: ${results.errors}`);
+};
+
+/**
+ * Compare results between optimized and unoptimized endpoints
+ * @param {string} name - Name of the comparison
+ * @param {Object} unoptimizedResults - Results from unoptimized endpoint
+ * @param {Object} optimizedResults - Results from optimized endpoint
+ */
+const compareResults = (name, unoptimizedResults, optimizedResults) => {
+  const unoptimizedLatency = unoptimizedResults.latency.average;
+  const optimizedLatency = optimizedResults.latency.average;
+  const improvement = ((unoptimizedLatency - optimizedLatency) / unoptimizedLatency * 100).toFixed(2);
+  
+  const unoptimizedThroughput = unoptimizedResults.requests.average;
+  const optimizedThroughput = optimizedResults.requests.average;
+  const throughputImprovement = ((optimizedThroughput - unoptimizedThroughput) / unoptimizedThroughput * 100).toFixed(2);
+  
+  console.log(`\n🔍 ${name} Comparison:`);
+  console.log(`  Unoptimized latency: ${unoptimizedLatency.toFixed(2)}ms`);
+  console.log(`  Optimized latency: ${optimizedLatency.toFixed(2)}ms`);
+  console.log(`  Latency improvement: ${improvement}%`);
+  console.log(`  Unoptimized throughput: ${unoptimizedThroughput.toFixed(2)} req/sec`);
+  console.log(`  Optimized throughput: ${optimizedThroughput.toFixed(2)} req/sec`);
+  console.log(`  Throughput improvement: ${throughputImprovement}%`);
+};
+
+/**
+ * Main function to run all benchmarks
+ */
+const runBenchmarks = async () => {
+  try {
+    console.log('🚀 Starting Performance Benchmarks');
+    console.log('=================================');
+    
+    const resultsDir = path.join(__dirname, 'results');
+    if (!fs.existsSync(resultsDir)) {
+      await mkdir(resultsDir, { recursive: true });
+    }
+    
+    // 1. Process Users endpoints
+    console.log('\n🔍 Testing Process Users Endpoint:');
+    const processUsersResults = await runHttpBenchmark({
+      url: 'http://localhost:3000/api/performance/process-users',
+      connections: 5,
+      duration: 5,
+      method: 'POST',
+      body: JSON.stringify({ userIds: [1, 2, 3, 4, 5] }),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    displayHttpResults('Process Users Endpoint', processUsersResults);
+    
+    console.log('\n🔍 Testing Process Users Optimized Endpoint:');
+    const processUsersOptimizedResults = await runHttpBenchmark({
+      url: 'http://localhost:3000/api/performance/process-users-optimized',
+      connections: 5,
+      duration: 5,
+      method: 'POST',
+      body: JSON.stringify({ userIds: [1, 2, 3, 4, 5] }),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    displayHttpResults('Process Users Optimized Endpoint', processUsersOptimizedResults);
+    
+    // 2. User Statistics endpoints
+    console.log('\n🔍 Testing User Statistics Endpoint:');
+    const userStatsResults = await runHttpBenchmark({
+      url: 'http://localhost:3000/api/performance/user-statistics/1?dataPoints=100',
+      connections: 5,
+      duration: 5,
+      method: 'GET'
+    });
+    displayHttpResults('User Statistics Endpoint', userStatsResults);
+    
+    console.log('\n🔍 Testing User Statistics Optimized Endpoint:');
+    const userStatsOptimizedResults = await runHttpBenchmark({
+      url: 'http://localhost:3000/api/performance/user-statistics-optimized/1?dataPoints=100',
+      connections: 5,
+      duration: 5,
+      method: 'GET'
+    });
+    displayHttpResults('User Statistics Optimized Endpoint', userStatsOptimizedResults);
+    
+    // 3. Read Files endpoints
+    console.log('\n🔍 Testing Read Files Endpoint:');
+    const readFilesResults = await runHttpBenchmark({
+      url: 'http://localhost:3000/api/performance/read-files',
+      connections: 5,
+      duration: 5,
+      method: 'POST',
+      body: JSON.stringify({ 
+        filePaths: [
+          path.join(__dirname, '../unit/models/taskModel.test.js'),
+          path.join(__dirname, '../unit/utils/config.test.js'),
+          path.join(__dirname, '../unit/middleware/errorHandler.test.js')
+        ] 
+      }),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    displayHttpResults('Read Files Endpoint', readFilesResults);
+    
+    console.log('\n🔍 Testing Read Files Optimized Endpoint:');
+    const readFilesOptimizedResults = await runHttpBenchmark({
+      url: 'http://localhost:3000/api/performance/read-files-optimized',
+      connections: 5,
+      duration: 5,
+      method: 'POST',
+      body: JSON.stringify({ 
+        filePaths: [
+          path.join(__dirname, '../unit/models/taskModel.test.js'),
+          path.join(__dirname, '../unit/utils/config.test.js'),
+          path.join(__dirname, '../unit/middleware/errorHandler.test.js')
+        ] 
+      }),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    displayHttpResults('Read Files Optimized Endpoint', readFilesOptimizedResults);
+    
+    // 4. Users with Tasks endpoints
+    console.log('\n🔍 Testing Users with Tasks Endpoint:');
+    const usersWithTasksResults = await runHttpBenchmark({
+      url: 'http://localhost:3000/api/performance/users-with-tasks',
+      connections: 5,
+      duration: 5,
+      method: 'GET'
+    });
+    displayHttpResults('Users with Tasks Endpoint', usersWithTasksResults);
+    
+    console.log('\n🔍 Testing Users with Tasks Optimized Endpoint:');
+    const usersWithTasksOptimizedResults = await runHttpBenchmark({
+      url: 'http://localhost:3000/api/performance/users-with-tasks-optimized',
+      connections: 5,
+      duration: 5,
+      method: 'GET'
+    });
+    displayHttpResults('Users with Tasks Optimized Endpoint', usersWithTasksOptimizedResults);
+    
+    console.log('\n📈 Performance Comparison: Optimized vs Unoptimized');
+    console.log('=================================================');
+    
+    compareResults('Process Users', processUsersResults, processUsersOptimizedResults);
+    compareResults('User Statistics', userStatsResults, userStatsOptimizedResults);
+    compareResults('Read Files', readFilesResults, readFilesOptimizedResults);
+    compareResults('Users with Tasks', usersWithTasksResults, usersWithTasksOptimizedResults);
+    
+    console.log('\n✅ Benchmarks completed successfully');
+    console.log('\nThese benchmarks demonstrate the performance improvements achieved by:');
+    console.log('1. Using Promise.all for parallel processing instead of sequential processing');
+    console.log('2. Implementing caching for expensive calculations');
+    console.log('3. Optimizing database queries to avoid the N+1 query problem');
+    console.log('4. Reading files in parallel instead of sequentially');
+    
+  } catch (error) {
+    console.error('❌ Error running benchmarks:', error);
+  }
+};
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  runBenchmarks();
+}

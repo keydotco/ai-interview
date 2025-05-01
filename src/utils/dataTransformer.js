@@ -1,6 +1,54 @@
+/**
+ * @module DataTransformer
+ * @description A powerful and flexible data transformation utility for handling complex data transformations.
+ * This module provides a robust way to transform data structures according to specified schema and transformations.
+ * It supports various operations like type conversion, date formatting, masking sensitive data, and more.
+ * 
+ * Features:
+ * - Schema-based transformation of complex nested objects
+ * - Built-in transformations for common data types
+ * - Custom transformation functions
+ * - Conditional transformations
+ * - Transformation caching for performance
+ * - Key mapping for property renaming
+ * 
+ * @example
+ * // Basic usage
+ * const transformer = new DataTransformer();
+ * const transformed = transformer.transform(data, {
+ *   name: 'string',
+ *   age: 'number',
+ *   email: ['mask', { prefix: 3, suffix: 4 }]
+ * });
+ * 
+ * @example
+ * // Advanced usage with options
+ * const transformer = new DataTransformer({
+ *   preserveNulls: true,
+ *   dateFormat: 'ymd',
+ *   keyMapping: { 'firstName': 'first_name' }
+ * });
+ */
+
 import crypto from 'crypto';
 
 export class DataTransformer {
+  /**
+   * Creates a new DataTransformer instance
+   * 
+   * @param {Object} options - Configuration options for the transformer
+   * @param {boolean} [options.preserveNulls=false] - Whether to preserve null values or convert them to empty strings
+   * @param {string} [options.dateFormat='iso'] - Default date format ('iso', 'timestamp', 'unix', 'ymd')
+   * @param {Object} [options.keyMapping=null] - Mapping to rename keys in the output
+   * @param {Object} [options.transformations={}] - Custom transformations to add to the default set
+   * 
+   * @example
+   * const transformer = new DataTransformer({
+   *   preserveNulls: true,
+   *   dateFormat: 'ymd',
+   *   keyMapping: { 'userId': 'user_id' }
+   * });
+   */
   constructor(options = {}) {
     this.options = {
       preserveNulls: false,
@@ -164,6 +212,32 @@ export class DataTransformer {
     return value;
   }
   
+  /**
+   * Transforms data according to the provided schema
+   * 
+   * @param {any} data - The data to transform
+   * @param {Object|string|Function|Array} schema - Schema defining the transformations to apply
+   * @returns {any} The transformed data
+   * 
+   * @example
+   * // Transform an object
+   * transformer.transform({
+   *   name: 'John Doe',
+   *   email: 'john.doe@example.com',
+   *   age: '42'
+   * }, {
+   *   name: 'string',
+   *   email: ['mask', { prefix: 3, suffix: 4 }],
+   *   age: 'number'
+   * });
+   * 
+   * @example
+   * // Transform an array of objects
+   * transformer.transform([user1, user2], {
+   *   name: 'string',
+   *   email: ['mask', { prefix: 3, suffix: 4 }]
+   * });
+   */
   transform(data, schema) {
     if (!data) return data;
     
@@ -215,10 +289,26 @@ export class DataTransformer {
     return result;
   }
   
+  /**
+   * Clears the transformation cache
+   * Use this when you want to force recalculation of all transformations
+   */
   clearCache() {
     this.transformationCache.clear();
   }
   
+  /**
+   * Extends the available transformations with new ones
+   * 
+   * @param {Object} newTransformations - Object containing new transformation functions
+   * @returns {DataTransformer} The transformer instance for chaining
+   * 
+   * @example
+   * transformer.extendTransformations({
+   *   uppercase: (val) => String(val).toUpperCase(),
+   *   truncate: (val, length = 10) => String(val).substring(0, length)
+   * });
+   */
   extendTransformations(newTransformations) {
     this.transformations = {
       ...this.transformations,
@@ -230,6 +320,16 @@ export class DataTransformer {
   }
 }
 
+/**
+ * Creates and returns a new DataTransformer instance
+ * 
+ * @param {Object} options - Configuration options for the transformer
+ * @returns {DataTransformer} A new DataTransformer instance
+ * 
+ * @example
+ * const transformer = createTransformer({ dateFormat: 'unix' });
+ * const result = transformer.transform(data, schema);
+ */
 export const createTransformer = (options) => {
   return new DataTransformer(options);
 };

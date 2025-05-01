@@ -13,6 +13,8 @@ import { logger } from '../logger.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const statsCache = new Map();
+
 /**
  * Processes user data sequentially
  * This function processes each user one at a time, which is inefficient for large datasets
@@ -40,6 +42,37 @@ export const processUserData = async (userIds) => {
   
   return {
     results,
+    processingTime: endTime - startTime
+  };
+};
+
+/**
+ * Processes user data in parallel using Promise.all
+ * This optimized version processes all users simultaneously
+ */
+export const processUserDataOptimized = async (userIds) => {
+  logger.info(`Processing ${userIds.length} users in parallel`);
+  const startTime = Date.now();
+  
+  const promises = userIds.map(async (userId) => {
+    try {
+      const userData = await fetchUserData(userId);
+      const processedData = await processUser(userData);
+      return processedData;
+    } catch (error) {
+      logger.error(`Error processing user ${userId}:`, error);
+      return null;
+    }
+  });
+  
+  const results = await Promise.all(promises);
+  const filteredResults = results.filter(result => result !== null);
+  
+  const endTime = Date.now();
+  logger.info(`Parallel processing completed in ${endTime - startTime}ms`);
+  
+  return {
+    results: filteredResults,
     processingTime: endTime - startTime
   };
 };
@@ -97,6 +130,70 @@ export const calculateUserStatistics = async (userId, dataPoints) => {
     stats,
     calculationTime: endTime - startTime
   };
+};
+
+/**
+ * Calculates user statistics with caching
+ * This optimized version uses memoization to avoid redundant calculations
+ */
+export const calculateUserStatisticsOptimized = async (userId, dataPoints) => {
+  logger.info(`Calculating statistics for user ${userId} with ${dataPoints} data points`);
+  const startTime = Date.now();
+  
+  const cacheKey = `${userId}-${dataPoints}`;
+  
+  if (statsCache.has(cacheKey)) {
+    logger.info(`Using cached statistics for user ${userId}`);
+    const cachedResult = statsCache.get(cacheKey);
+    
+    return {
+      ...cachedResult,
+      fromCache: true,
+      calculationTime: 0
+    };
+  }
+  
+  const historicalData = await fetchUserHistoricalData(userId, dataPoints);
+  
+  const stats = {
+    average: calculateAverage(historicalData),
+    median: calculateMedian(historicalData),
+    standardDeviation: calculateStandardDeviation(historicalData),
+    percentiles: calculatePercentiles(historicalData)
+  };
+  
+  const endTime = Date.now();
+  const calculationTime = endTime - startTime;
+  logger.info(`Statistics calculation completed in ${calculationTime}ms`);
+  
+  const result = {
+    userId,
+    stats,
+    calculationTime,
+    cachedAt: new Date().toISOString()
+  };
+  
+  statsCache.set(cacheKey, result);
+  
+  return result;
+};
+
+/**
+ * Clears the statistics cache
+ * Use this when data changes and cache needs to be invalidated
+ */
+export const clearStatisticsCache = (userId = null) => {
+  if (userId) {
+    for (const key of statsCache.keys()) {
+      if (key.startsWith(`${userId}-`)) {
+        statsCache.delete(key);
+      }
+    }
+    logger.info(`Cleared statistics cache for user ${userId}`);
+  } else {
+    statsCache.clear();
+    logger.info('Cleared entire statistics cache');
+  }
 };
 
 /**
@@ -202,6 +299,42 @@ export const readFilesSequentially = async (filePaths) => {
   
   const endTime = Date.now();
   logger.info(`Sequential file reading completed in ${endTime - startTime}ms`);
+  
+  return {
+    results,
+    processingTime: endTime - startTime
+  };
+};
+
+/**
+ * Reads files in parallel using Promise.all
+ * This optimized version processes all files simultaneously
+ */
+export const readFilesParallel = async (filePaths) => {
+  logger.info(`Reading ${filePaths.length} files in parallel`);
+  const startTime = Date.now();
+  
+  const filePromises = filePaths.map(async (filePath) => {
+    try {
+      const content = await fs.readFile(filePath, 'utf8');
+      return {
+        path: filePath,
+        content,
+        size: content.length
+      };
+    } catch (error) {
+      logger.error(`Error reading file ${filePath}:`, error);
+      return {
+        path: filePath,
+        error: error.message
+      };
+    }
+  });
+  
+  const results = await Promise.all(filePromises);
+  
+  const endTime = Date.now();
+  logger.info(`Parallel file reading completed in ${endTime - startTime}ms`);
   
   return {
     results,
