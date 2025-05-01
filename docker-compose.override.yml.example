@@ -1,0 +1,16 @@
+services:
+  ai-interview-base:
+    command: ["npm", "run", "start:nodemon"]
+    environment:
+      APP_PORT: 8008
+    ports:
+      - 8085:8008
+      - 9235:9239
+    volumes:
+      - type: bind
+        source: ./src
+        target: /usr/src/app/src
+  ai-interview-local:
+    extends: ai-interview-base
+    environment:
+      - SQS_HOST=http://dockerhost:9324 # Goldies ElasticMQ

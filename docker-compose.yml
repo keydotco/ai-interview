@@ -1,0 +1,32 @@
+services:
+  # Base ai-interview service to extend from
+  ai-interview-base:
+    build: ./
+    profiles: ["base"]
+    environment:
+      - LOGS_USE_COLOR=true
+    ports:
+      - 8085:8008
+  ai-interview-local:
+    extends: ai-interview-base
+    profiles: ["local"]
+    environment:
+      - APP_ENV=dev
+      - NODE_ENV=dev
+    depends_on:
+      - dockerhost
+  ai-interview-api:
+    extends: ai-interview-base
+    profiles: ["api"]
+    environment:
+      - APP_ENV=dev
+      - NODE_ENV=dev
+    depends_on:
+      - dockerhost
+  # Docker host for local development
+  dockerhost:
+    image: qoomon/docker-host
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    restart: always
