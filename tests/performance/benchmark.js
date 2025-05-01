@@ -334,37 +334,97 @@ const runAllBenchmarks = async () => {
   console.log(formatResults(cachingResults));
   console.log('\n' + '-'.repeat(50) + '\n');
   
-  // 4. HTTP Benchmark
-  console.log('📊 Running HTTP benchmark against API endpoint:');
+  // 4. HTTP Benchmarks
+  console.log('📊 Running HTTP benchmarks against API endpoints:');
   console.log('Note: Server should already be running on localhost:3000');
+  
+  // Helper function to format and display HTTP benchmark results
+  const displayHttpResults = (name, results) => {
+    console.log(`\n--- ${name} Benchmark Results ---`);
+    console.log(formatResults({
+      requests: {
+        total: results.requests.total,
+        average: results.requests.average,
+        sent: results.requests.sent
+      },
+      latency: {
+        avg: results.latency.average,
+        min: results.latency.min,
+        max: results.latency.max,
+        p99: results.latency.p99
+      },
+      throughput: {
+        avg: results.throughput.average,
+        min: results.throughput.min,
+        max: results.throughput.max
+      }
+    }));
+  };
+  
   try {
-    const httpResults = await runHttpBenchmark({
+    console.log('\n🔍 Testing Health Endpoint (baseline):');
+    const healthResults = await runHttpBenchmark({
       url: 'http://localhost:3000/health',
       connections: 10,
       duration: 5,
       method: 'GET'
     });
+    displayHttpResults('Health Endpoint', healthResults);
     
-    console.log(formatResults({
-      requests: {
-        total: httpResults.requests.total,
-        average: httpResults.requests.average,
-        sent: httpResults.requests.sent
+    console.log('\n🔍 Testing Process Users Endpoint:');
+    const processUsersResults = await runHttpBenchmark({
+      url: 'http://localhost:3000/api/performance/process-users',
+      connections: 5,
+      duration: 5,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
       },
-      latency: {
-        avg: httpResults.latency.average,
-        min: httpResults.latency.min,
-        max: httpResults.latency.max,
-        p99: httpResults.latency.p99
+      body: JSON.stringify({
+        userIds: ['user1', 'user2', 'user3', 'user4', 'user5']
+      })
+    });
+    displayHttpResults('Process Users Endpoint', processUsersResults);
+    
+    console.log('\n🔍 Testing User Statistics Endpoint:');
+    const userStatsResults = await runHttpBenchmark({
+      url: 'http://localhost:3000/api/performance/user-statistics/user1?dataPoints=50',
+      connections: 5,
+      duration: 5,
+      method: 'GET'
+    });
+    displayHttpResults('User Statistics Endpoint', userStatsResults);
+    
+    console.log('\n🔍 Testing Read Files Endpoint:');
+    const readFilesResults = await runHttpBenchmark({
+      url: 'http://localhost:3000/api/performance/read-files',
+      connections: 5,
+      duration: 5,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
       },
-      throughput: {
-        avg: httpResults.throughput.average,
-        min: httpResults.throughput.min,
-        max: httpResults.throughput.max
-      }
-    }));
+      body: JSON.stringify({
+        filePaths: [
+          'package.json',
+          'README.md',
+          '.env.example'
+        ]
+      })
+    });
+    displayHttpResults('Read Files Endpoint', readFilesResults);
+    
+    console.log('\n🔍 Testing Users with Tasks Endpoint:');
+    const usersWithTasksResults = await runHttpBenchmark({
+      url: 'http://localhost:3000/api/performance/users-with-tasks',
+      connections: 5,
+      duration: 5,
+      method: 'GET'
+    });
+    displayHttpResults('Users with Tasks Endpoint', usersWithTasksResults);
+    
   } catch (error) {
-    console.error('Error running HTTP benchmark:', error.message);
+    console.error('Error running HTTP benchmarks:', error.message);
     console.log('Make sure your server is running on http://localhost:3000');
   }
   
