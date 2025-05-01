@@ -2,6 +2,7 @@
  * Unit tests for the task service
  */
 
+import { jest } from '@jest/globals';
 import { taskService } from '../../../src/services/taskService.js';
 import { taskModel } from '../../../src/models/taskModel.js';
 

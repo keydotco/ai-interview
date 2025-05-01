@@ -2,6 +2,7 @@
  * Unit tests for the error handler middleware
  */
 
+import { jest } from '@jest/globals';
 import { errorHandler } from '../../../src/middleware/errorHandler.js';
 
 describe('Error Handler Middleware', () => {

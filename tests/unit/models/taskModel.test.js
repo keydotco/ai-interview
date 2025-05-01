@@ -2,6 +2,7 @@
  * Unit tests for the task model
  */
 
+import { jest } from '@jest/globals';
 import { taskModel } from '../../../src/models/taskModel.js';
 
 describe('Task Model', () => {

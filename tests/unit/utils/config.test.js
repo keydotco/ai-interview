@@ -2,6 +2,7 @@
  * Unit tests for the configuration utility
  */
 
+import { jest } from '@jest/globals';
 import { loadConfig } from '../../../src/utils/config.js';
 
 describe('Configuration Utility', () => {

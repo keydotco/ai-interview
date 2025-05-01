@@ -2,6 +2,7 @@
  * Unit tests for the task controller
  */
 
+import { jest } from '@jest/globals';
 import { taskController } from '../../../src/controllers/taskController.js';
 import { taskService } from '../../../src/services/taskService.js';
 
