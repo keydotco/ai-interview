@@ -15,7 +15,7 @@ jest.spyOn(crypto, 'scrypt').mockImplementation((password, salt, keylen, options
   // Mock implementation that simulates successful hashing
   callback(null, Buffer.from('mockderivedkey'));
 });
-jest.spyOn(jwt, 'sign').mockImplementation(() => jest.fn());
+jest.spyOn(jwt, 'sign').mockImplementation(() => 'jwt_token');
 
 describe('Auth Controller', () => {
   let req;
@@ -122,7 +122,7 @@ describe('Auth Controller', () => {
         id: '123',
         name: 'Test User',
         email: 'test@example.com',
-        password: 'salt:hashedpassword',
+        password: 'salt:6861736865647061737377647264',
         role: 'user'
       };
       const token = 'jwt_token';
@@ -130,10 +130,11 @@ describe('Auth Controller', () => {
       req.body = credentials;
       
       userModel.findByEmail.mockResolvedValue(user);
-      // Mock successful password verification by ensuring scrypt returns the expected hash
-      crypto.scrypt.mockImplementation((password, salt, keylen, options, callback) => {
-        callback(null, Buffer.from('hashedpassword', 'hex'));
+      
+      jest.spyOn(crypto, 'scrypt').mockImplementation((password, salt, keylen, options, callback) => {
+        callback(null, Buffer.from('6861736865647061737377647264', 'hex'));
       });
+      
       jwt.sign.mockReturnValue(token);
       
       await authController.login(req, res, next);
