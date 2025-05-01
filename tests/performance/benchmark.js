@@ -38,10 +38,16 @@ export const runHttpBenchmark = async (options) => {
   const run = promisify(autocannon);
   const results = await run(benchmarkOptions);
   
-  const timestamp = new Date().toISOString().replace(/:/g, '-');
-  const resultsPath = path.join(__dirname, 'results', `benchmark-${timestamp}.json`);
-  
-  await writeFile(resultsPath, JSON.stringify(results, null, 2));
+  // Try to save results to file, but continue if it fails
+  try {
+    const timestamp = new Date().toISOString().replace(/:/g, '-');
+    const resultsPath = path.join(__dirname, 'results', `benchmark-${timestamp}.json`);
+    
+    await writeFile(resultsPath, JSON.stringify(results, null, 2));
+    console.log(`Results saved to ${resultsPath}`);
+  } catch (error) {
+    console.log(`Note: Could not save results to file (${error.code}). Continuing with benchmark.`);
+  }
   
   return results;
 };
@@ -218,3 +224,155 @@ export const benchmarkCaching = async (uncachedFn, cachedFn, args = [], iteratio
     }
   };
 };
+
+/**
+ * Format benchmark results for console output
+ * @param {Object} results - Benchmark results to format
+ * @returns {String} - Formatted results string
+ */
+const formatResults = (results) => {
+  const formatObject = (obj, indent = 0) => {
+    const spaces = ' '.repeat(indent);
+    return Object.entries(obj)
+      .map(([key, value]) => {
+        if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+          return `${spaces}${key}:\n${formatObject(value, indent + 2)}`;
+        } else if (Array.isArray(value) && typeof value[0] === 'object') {
+          return `${spaces}${key}: [\n${value.map(item => formatObject(item, indent + 4)).join(',\n')}\n${spaces}]`;
+        } else if (typeof value === 'number') {
+          return `${spaces}${key}: ${value.toFixed(2)}`;
+        } else {
+          return `${spaces}${key}: ${value}`;
+        }
+      })
+      .join('\n');
+  };
+  
+  return formatObject(results);
+};
+
+/**
+ * Sample functions for benchmarking
+ */
+const slowFibonacci = (n) => {
+  if (n <= 1) return n;
+  return slowFibonacci(n - 1) + slowFibonacci(n - 2);
+};
+
+const fastFibonacci = (n) => {
+  const fib = [0, 1];
+  for (let i = 2; i <= n; i++) {
+    fib[i] = fib[i - 1] + fib[i - 2];
+  }
+  return fib[n];
+};
+
+const sequentialProcess = async (items) => {
+  const results = [];
+  for (const item of items) {
+    results.push(await processItem(item));
+  }
+  return results;
+};
+
+const parallelProcess = async (items) => {
+  return Promise.all(items.map(item => processItem(item)));
+};
+
+const processItem = async (item) => {
+  return new Promise(resolve => {
+    setTimeout(() => resolve(item * 2), 50);
+  });
+};
+
+// Cached function implementation
+const cache = new Map();
+const uncachedCalculation = async (n) => {
+  await new Promise(resolve => setTimeout(resolve, 100));
+  return n * n;
+};
+
+const cachedCalculation = async (n) => {
+  if (cache.has(n)) {
+    return cache.get(n);
+  }
+  await new Promise(resolve => setTimeout(resolve, 100));
+  const result = n * n;
+  cache.set(n, result);
+  return result;
+};
+/**
+ * Run all benchmarks
+ */
+const runAllBenchmarks = async () => {
+  console.log('===== BENCHMARK RESULTS =====\n');
+  
+  // 1. Function Performance Comparison
+  console.log('📊 Comparing slow vs fast Fibonacci functions:');
+  const fibResults = await compareFunctionPerformance(slowFibonacci, fastFibonacci, [20], 5);
+  console.log(formatResults(fibResults));
+  console.log('\n' + '-'.repeat(50) + '\n');
+  
+  // 2. Sequential vs Parallel
+  console.log('📊 Comparing sequential vs parallel processing:');
+  const parallelResults = await benchmarkSequentialVsParallel(
+    sequentialProcess, 
+    parallelProcess, 
+    [[1, 2, 3, 4, 5]]
+  );
+  console.log(formatResults(parallelResults));
+  console.log('\n' + '-'.repeat(50) + '\n');
+  
+  // 3. Caching benchmark
+  console.log('📊 Comparing cached vs uncached calculation:');
+  const cachingResults = await benchmarkCaching(
+    uncachedCalculation,
+    cachedCalculation,
+    [42],
+    5
+  );
+  console.log(formatResults(cachingResults));
+  console.log('\n' + '-'.repeat(50) + '\n');
+  
+  // 4. HTTP Benchmark
+  console.log('📊 Running HTTP benchmark against API endpoint:');
+  console.log('Note: Server should already be running on localhost:3000');
+  try {
+    const httpResults = await runHttpBenchmark({
+      url: 'http://localhost:3000/health',
+      connections: 10,
+      duration: 5,
+      method: 'GET'
+    });
+    
+    console.log(formatResults({
+      requests: {
+        total: httpResults.requests.total,
+        average: httpResults.requests.average,
+        sent: httpResults.requests.sent
+      },
+      latency: {
+        avg: httpResults.latency.average,
+        min: httpResults.latency.min,
+        max: httpResults.latency.max,
+        p99: httpResults.latency.p99
+      },
+      throughput: {
+        avg: httpResults.throughput.average,
+        min: httpResults.throughput.min,
+        max: httpResults.throughput.max
+      }
+    }));
+  } catch (error) {
+    console.error('Error running HTTP benchmark:', error.message);
+    console.log('Make sure your server is running on http://localhost:3000');
+  }
+  
+  console.log('\n===== END OF BENCHMARKS =====');
+};
+
+// Run the benchmarks
+runAllBenchmarks().catch(error => {
+  console.error('Error running benchmarks:', error);
+  process.exit(1);
+});
