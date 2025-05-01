@@ -3,7 +3,7 @@
  */
 
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
+import argon2 from 'argon2';
 import { userModel } from '../models/userModel.js';
 import { logger } from '../utils/logger.js';
 import { loadConfig } from '../utils/config.js';
@@ -28,8 +28,7 @@ export const authController = {
         throw error;
       }
       
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(password, salt);
+      const hashedPassword = await argon2.hash(password);
       
       const newUser = await userModel.create({
         name,
@@ -73,8 +72,15 @@ export const authController = {
         throw error;
       }
       
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) {
+      try {
+        const isMatch = await argon2.verify(user.password, password);
+        if (!isMatch) {
+          const error = new Error('Invalid credentials');
+          error.statusCode = 401;
+          throw error;
+        }
+      } catch (verifyError) {
+        logger.error('Error verifying password:', verifyError);
         const error = new Error('Invalid credentials');
         error.statusCode = 401;
         throw error;

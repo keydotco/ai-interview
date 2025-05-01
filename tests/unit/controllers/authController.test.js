@@ -5,14 +5,13 @@
 import { jest } from '@jest/globals';
 import { authController } from '../../../src/controllers/authController.js';
 import { userModel } from '../../../src/models/userModel.js';
-import bcrypt from 'bcrypt';
+import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
 
 jest.spyOn(userModel, 'findByEmail').mockImplementation(() => jest.fn());
 jest.spyOn(userModel, 'create').mockImplementation(() => jest.fn());
-jest.spyOn(bcrypt, 'genSalt').mockImplementation(() => jest.fn());
-jest.spyOn(bcrypt, 'hash').mockImplementation(() => jest.fn());
-jest.spyOn(bcrypt, 'compare').mockImplementation(() => jest.fn());
+jest.spyOn(argon2, 'hash').mockImplementation(() => jest.fn());
+jest.spyOn(argon2, 'verify').mockImplementation(() => jest.fn());
 jest.spyOn(jwt, 'sign').mockImplementation(() => jest.fn());
 
 describe('Auth Controller', () => {
@@ -54,16 +53,14 @@ describe('Auth Controller', () => {
       req.body = userData;
       
       userModel.findByEmail.mockResolvedValue(null);
-      bcrypt.genSalt.mockResolvedValue('salt');
-      bcrypt.hash.mockResolvedValue(hashedPassword);
+      argon2.hash.mockResolvedValue(hashedPassword);
       userModel.create.mockResolvedValue(newUser);
       jwt.sign.mockReturnValue(token);
       
       await authController.register(req, res, next);
       
       expect(userModel.findByEmail).toHaveBeenCalledWith(userData.email);
-      expect(bcrypt.genSalt).toHaveBeenCalledWith(10);
-      expect(bcrypt.hash).toHaveBeenCalledWith(userData.password, 'salt');
+      expect(argon2.hash).toHaveBeenCalledWith(userData.password);
       expect(userModel.create).toHaveBeenCalledWith({
         name: userData.name,
         email: userData.email,
@@ -129,13 +126,13 @@ describe('Auth Controller', () => {
       req.body = credentials;
       
       userModel.findByEmail.mockResolvedValue(user);
-      bcrypt.compare.mockResolvedValue(true);
+      argon2.verify.mockResolvedValue(true);
       jwt.sign.mockReturnValue(token);
       
       await authController.login(req, res, next);
       
       expect(userModel.findByEmail).toHaveBeenCalledWith(credentials.email);
-      expect(bcrypt.compare).toHaveBeenCalledWith(credentials.password, user.password);
+      expect(argon2.verify).toHaveBeenCalledWith(user.password, credentials.password);
       expect(jwt.sign).toHaveBeenCalled();
       expect(res.json).toHaveBeenCalledWith({
         id: user.id,
@@ -188,7 +185,7 @@ describe('Auth Controller', () => {
       req.body = credentials;
       
       userModel.findByEmail.mockResolvedValue(user);
-      bcrypt.compare.mockResolvedValue(false);
+      argon2.verify.mockResolvedValue(false);
       
       await authController.login(req, res, next);
       
