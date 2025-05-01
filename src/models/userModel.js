@@ -21,10 +21,15 @@ export const userModel = {
   },
 
   create: async (userData) => {
+    if (!userData.name || !userData.email) {
+      throw new Error('Name and email are required');
+    }
+    
     const newUser = {
       id: uuidv4(),
       name: userData.name,
       email: userData.email,
+      password: userData.password,
       role: userData.role || 'user',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
