@@ -273,7 +273,7 @@ describe('LosKhipPricingCalculator', () => {
         });
     });
 
-    describe.only('bug1', () => {
+    describe('bug1', () => {
         it('should respect limited LOS options for single-day records', () => {
             const calculator = new LosKhipPricingCalculator({
                 losRecords: [
@@ -298,7 +298,7 @@ describe('LosKhipPricingCalculator', () => {
                 ]
             });
             const result = calculator.getBaseRates();
-            
+
             expect(result).to.be.an('array');
             expect(result).to.have.length(1);
             
