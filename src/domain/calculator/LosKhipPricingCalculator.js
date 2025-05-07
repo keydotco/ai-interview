@@ -11,18 +11,35 @@ class LosKhipPricingCalculator extends AbstractKhipPricingCalculator {
         const recordPairMap = {};
         let lastValidLos = 0;
         let lastValidRate = 0;
+        let minLos = Infinity;
 
+        // First pass to determine minimum LOS in the data
+        for (let i = 0; i < recordPairs.length; i += 2) {
+            const los = parseInt(recordPairs[i]);
+            const rate = parseFloat(recordPairs[i + 1]);
+            
+            if (!isNaN(rate) && rate && !isNaN(los)) {
+                minLos = Math.min(minLos, los);
+            }
+        }
+        
+        // If minimum LOS exceeds our MAX_RELEVANT_LOS, we should return empty
+        if (minLos > MAX_RELEVANT_LOS) {
+            return {};
+        }
+
+        // Original processing logic
         for (let i = 0; i < recordPairs.length; i += 2) {
             const los = parseInt(recordPairs[i]);
             const rate = parseFloat(recordPairs[i + 1]);
 
-            // Add the current LOS rate if it's within our limit and valid
-            if (!isNaN(rate) && rate && los <= MAX_RELEVANT_LOS) {
+            // Add the current LOS rate if it's valid
+            if (!isNaN(rate) && rate) {
                 recordPairMap[los] = rate;
 
                 // Fill in gaps between last valid LOS and current LOS
                 for (let j = lastValidLos + 1; j < los; j++) {
-                    if (j <= MAX_RELEVANT_LOS && !recordPairMap[j]) {
+                    if (!recordPairMap[j]) {
                         recordPairMap[j] = (lastValidRate / lastValidLos) * j;
                     }
                 }
@@ -33,17 +50,17 @@ class LosKhipPricingCalculator extends AbstractKhipPricingCalculator {
             }
         }
 
-        // If the last valid LOS we processed was less than MAX_RELEVANT_LOS,
-        // fill in the remaining days up to MAX_RELEVANT_LOS using the last valid rate
-        if (lastValidLos < MAX_RELEVANT_LOS && lastValidRate) {
-            for (let i = lastValidLos + 1; i <= MAX_RELEVANT_LOS; i++) {
-                if (!recordPairMap[i]) {
-                    recordPairMap[i] = (lastValidRate / lastValidLos) * i;
-                }
+        // Apply the MAX_RELEVANT_LOS limit
+        const maxLos = Math.min(lastValidLos, MAX_RELEVANT_LOS);
+        const limitedRecordPairMap = {};
+        
+        for (const [los, rate] of Object.entries(recordPairMap)) {
+            if (parseInt(los) <= maxLos) {
+                limitedRecordPairMap[los] = rate;
             }
         }
 
-        return recordPairMap;
+        return limitedRecordPairMap;
     }
 
     _addRates(mappedRates, losRateMap, startDate) {
