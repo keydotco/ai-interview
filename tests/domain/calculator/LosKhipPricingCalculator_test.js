@@ -272,4 +272,39 @@ describe('LosKhipPricingCalculator', () => {
             expect(rateEntry.reliability).to.equal('estimated');
         });
     });
+
+    describe.only('bug1', () => {
+        it('should respect limited LOS options for single-day records', () => {
+            const calculator = new LosKhipPricingCalculator({
+                losRecords: [
+                    '2026-01-31,4,1,295.00'
+                ]
+            });
+            const result = calculator.getBaseRates();
+
+            expect(result).to.be.an('array');
+            expect(result).to.have.length(1);
+            expect(result[0].start).to.equal('2026-01-31');
+            expect(result[0].end).to.equal('2026-02-01'); // Final day
+            expect(result[0].nightlyRate).to.equal(295.00);
+        });
+
+        it('should handle decreasing LOS availability at end of month', () => {
+            const calculator = new LosKhipPricingCalculator({
+                losRecords: [
+                    '2026-01-29,4,1,219.00,2,282.00,3,352.00',
+                    '2026-01-30,4,1,258.00,2,328.00',
+                    '2026-01-31,4,1,295.00'
+                ]
+            });
+            const result = calculator.getBaseRates();
+            
+            expect(result).to.be.an('array');
+            expect(result).to.have.length(1);
+            
+            expect(result[0].start).to.equal('2026-01-29');
+            expect(result[0].end).to.equal('2026-02-01');
+            expect(result[0].nightlyRate).to.equal(142.17);
+        });
+    });
 });
