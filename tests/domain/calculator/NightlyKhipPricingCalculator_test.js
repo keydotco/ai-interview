@@ -2,7 +2,7 @@ const { expect } = require('chai');
 const NightlyKhipPricingCalculator = require('../../../src/domain/calculator/NightlyKhipPricingCalculator');
 const samplePricing3015 = require('./aie-3015_pricing.json');
 
-describe.only('NightlyKhipPricingCalculator', () => {
+describe('NightlyKhipPricingCalculator', () => {
   describe('getBaseRates', () => {
     it('should return an array of base rates', () => {
       const calculator = new NightlyKhipPricingCalculator({
