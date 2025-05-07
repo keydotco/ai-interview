@@ -12,6 +12,8 @@ describe('NightlyKhipPricingCalculator', () => {
 
       expect(result).to.be.an('array');
       expect(result.length).to.equal(17);
+      
+      // ADD SPECIFIC TESTS HERE TO HELP YOU DEBUG
     });
   });
 });
