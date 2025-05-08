@@ -1,0 +1,206 @@
+{
+    "nightlyPricing": {
+        "defaultNightlyPricing": {
+            "nightlyPrice": 300
+        },
+        "nightlyPricingOverrides": [
+            {
+                "nightlyPrice": 450,
+                "dateRange": {
+                    "from": "2025-05-07",
+                    "until": "2025-05-09"
+                }
+            },
+            {
+                "nightlyPrice": 460,
+                "dateRange": {
+                    "from": "2025-05-10",
+                    "until": "2025-05-11"
+                }
+            },
+            {
+                "nightlyPrice": 450,
+                "dateRange": {
+                    "from": "2025-05-12",
+                    "until": "2025-05-16"
+                }
+            },
+            {
+                "nightlyPrice": 460,
+                "dateRange": {
+                    "from": "2025-05-17",
+                    "until": "2025-05-18"
+                }
+            },
+            {
+                "nightlyPrice": 450,
+                "dateRange": {
+                    "from": "2025-05-19",
+                    "until": "2025-05-23"
+                }
+            },
+            {
+                "nightlyPrice": 500,
+                "dateRange": {
+                    "from": "2025-05-24",
+                    "until": "2025-05-25"
+                }
+            },
+            {
+                "nightlyPrice": 450,
+                "dateRange": {
+                    "from": "2025-05-26",
+                    "until": "2025-05-31"
+                }
+            },
+            {
+                "nightlyPrice": 300,
+                "dateRange": {
+                    "from": "2025-06-01",
+                    "until": "2025-06-30"
+                }
+            },
+            {
+                "nightlyPrice": 365,
+                "dateRange": {
+                    "from": "2025-07-01",
+                    "until": "2025-07-10"
+                }
+            },
+            {
+                "nightlyPrice": 500,
+                "dateRange": {
+                    "from": "2025-07-11",
+                    "until": "2025-07-12"
+                }
+            },
+            {
+                "nightlyPrice": 365,
+                "dateRange": {
+                    "from": "2025-07-13",
+                    "until": "2025-07-17"
+                }
+            },
+            {
+                "nightlyPrice": 500,
+                "dateRange": {
+                    "from": "2025-07-18",
+                    "until": "2025-07-19"
+                }
+            },
+            {
+                "nightlyPrice": 365,
+                "dateRange": {
+                    "from": "2025-07-20",
+                    "until": "2025-07-24"
+                }
+            },
+            {
+                "nightlyPrice": 500,
+                "dateRange": {
+                    "from": "2025-07-25",
+                    "until": "2025-07-26"
+                }
+            },
+            {
+                "nightlyPrice": 365,
+                "dateRange": {
+                    "from": "2025-07-27",
+                    "until": "2025-07-31"
+                }
+            },
+            {
+                "nightlyPrice": 450,
+                "dateRange": {
+                    "from": "2025-08-01",
+                    "until": "2025-08-25"
+                }
+            }
+        ]
+    },
+    "pricingSettings": [
+        {
+            "pricingModel": "nightly_pricing",
+            "fees": [
+                {
+                    "chargeMode": "per_stay",
+                    "name": "Accidental Damage Coverage",
+                    "kind": "other",
+                    "productCode": "75",
+                    "includeInRent": false,
+                    "type": "flat_fee",
+                    "amount": 249,
+                    "applicabilityRules": [
+                        {
+                            "min": 1,
+                            "max": 29,
+                            "type": "for_los"
+                        }
+                    ]
+                },
+                {
+                    "chargeMode": "of_rent",
+                    "name": "Ala test 11.03.2025",
+                    "kind": "other",
+                    "productCode": "76",
+                    "includeInRent": false,
+                    "type": "percent_fee",
+                    "percent": 1
+                },
+                {
+                    "chargeMode": "of_rent",
+                    "name": "Ala test 16.03.2025",
+                    "kind": "other",
+                    "productCode": "77",
+                    "includeInRent": false,
+                    "type": "percent_fee",
+                    "percent": 1
+                },
+                {
+                    "chargeMode": "of_rent",
+                    "name": "AlaTest 17.03.2025",
+                    "kind": "other",
+                    "productCode": "78",
+                    "includeInRent": false,
+                    "type": "percent_fee",
+                    "percent": 1
+                },
+                {
+                    "chargeMode": "per_stay",
+                    "name": "Housekeeping Fee",
+                    "kind": "other",
+                    "productCode": "2",
+                    "includeInRent": false,
+                    "type": "flat_fee",
+                    "amount": 500,
+                    "applicabilityRules": [
+                        {
+                            "min": 1,
+                            "max": 27,
+                            "type": "for_los"
+                        }
+                    ]
+                },
+                {
+                    "chargeMode": "per_stay",
+                    "name": "Small Fee",
+                    "kind": "other",
+                    "productCode": "68",
+                    "includeInRent": false,
+                    "type": "flat_fee",
+                    "amount": 25,
+                    "applicabilityRules": [
+                        {
+                            "min": 1,
+                            "max": 364,
+                            "type": "for_los"
+                        }
+                    ]
+                }
+            ],
+            "taxes": [],
+            "currency": "USD"
+        }
+    ],
+    "pricingType": "nightly_pricing"
+}
