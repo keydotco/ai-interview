@@ -11,7 +11,8 @@ describe('NightlyKhipPricingCalculator', () => {
       const result = calculator.getBaseRates();
 
       expect(result).to.be.an('array');
-      expect(result.length).to.equal(17);
+      expect(result.length).to.equal(18);
+
       
       // ADD SPECIFIC TESTS HERE TO HELP YOU DEBUG
     });

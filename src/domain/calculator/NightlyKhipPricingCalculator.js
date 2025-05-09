@@ -44,7 +44,7 @@ class NightlyKhipPricingCalulator extends AbstractKhipPricingCalculator {
     /**
      * Compute the base rates from the payload's nightly pricing
      *
-     * @returns Object array of base rates with start, end, nightlyRate, and reliability
+     * @returns Object array of base rates with start, end, and nightlyRate
      */
     getBaseRates() {
         // guard clause - no nightly pricing

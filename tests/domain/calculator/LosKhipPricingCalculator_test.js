@@ -181,7 +181,7 @@ describe('LosKhipPricingCalculator', () => {
 
             // Check first rate entry
             const firstEntry = result[0];
-            expect(firstEntry).to.have.all.keys('start', 'end', 'nightlyRate', 'reliability');
+            expect(firstEntry).to.have.all.keys('start', 'end', 'nightlyRate');
             expect(firstEntry.start).to.equal('2025-04-28');
             expect(firstEntry.end).to.equal('2025-05-05'); // startDate + 7 days
             // Rate calculation including interpolated rates:
@@ -196,11 +196,10 @@ describe('LosKhipPricingCalculator', () => {
             // Total Rate = 3690.00
             // Average Rate = 3690/28 ≈ 131.79
             expect(firstEntry.nightlyRate).to.equal(131.79);
-            expect(firstEntry.reliability).to.equal('estimated');
 
             // Check second rate entry
             const secondEntry = result[1];
-            expect(secondEntry).to.have.all.keys('start', 'end', 'nightlyRate', 'reliability');
+            expect(secondEntry).to.have.all.keys('start', 'end', 'nightlyRate');
             expect(secondEntry.start).to.equal('2025-05-06');
             expect(secondEntry.end).to.equal('2025-05-13'); // startDate + 7 days
             // Rate calculation including interpolated rates:
@@ -215,7 +214,6 @@ describe('LosKhipPricingCalculator', () => {
             // Total Rate = 3797.50
             // Average Rate = 3797.50/28 ≈ 135.63
             expect(secondEntry.nightlyRate).to.equal(135.63);
-            expect(secondEntry.reliability).to.equal('estimated');
 
             // Verify chronological order and no gaps
             expect(moment(result[0].end).add(1, 'day').format('YYYY-MM-DD')).to.equal(result[1].start);
@@ -256,7 +254,7 @@ describe('LosKhipPricingCalculator', () => {
 
             // Check the rate entry structure and values
             const rateEntry = result[0];
-            expect(rateEntry).to.have.all.keys('start', 'end', 'nightlyRate', 'reliability');
+            expect(rateEntry).to.have.all.keys('start', 'end', 'nightlyRate');
 
             // Verify dates
             expect(rateEntry.start).to.equal('2025-05-01'); // Should start on second record's date
@@ -267,9 +265,6 @@ describe('LosKhipPricingCalculator', () => {
             // Total Rate = 160.00 + 530.00 + 850.00 = 1540.00
             // Average Rate = 1540.00 / 12 ≈ 135.63
             expect(rateEntry.nightlyRate).to.equal(135.63);
-
-            // Verify reliability
-            expect(rateEntry.reliability).to.equal('estimated');
         });
     });
 

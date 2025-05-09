@@ -7,113 +7,113 @@
             {
                 "nightlyPrice": 450,
                 "dateRange": {
-                    "from": "2025-05-07",
-                    "until": "2025-05-09"
+                    "from": "2026-05-07",
+                    "until": "2026-05-09"
                 }
             },
             {
                 "nightlyPrice": 460,
                 "dateRange": {
-                    "from": "2025-05-10",
-                    "until": "2025-05-11"
+                    "from": "2026-05-10",
+                    "until": "2026-05-11"
                 }
             },
             {
                 "nightlyPrice": 450,
                 "dateRange": {
-                    "from": "2025-05-12",
-                    "until": "2025-05-16"
+                    "from": "2026-05-12",
+                    "until": "2026-05-16"
                 }
             },
             {
                 "nightlyPrice": 460,
                 "dateRange": {
-                    "from": "2025-05-17",
-                    "until": "2025-05-18"
+                    "from": "2026-05-17",
+                    "until": "2026-05-18"
                 }
             },
             {
                 "nightlyPrice": 450,
                 "dateRange": {
-                    "from": "2025-05-19",
-                    "until": "2025-05-23"
+                    "from": "2026-05-19",
+                    "until": "2026-05-23"
                 }
             },
             {
                 "nightlyPrice": 500,
                 "dateRange": {
-                    "from": "2025-05-24",
-                    "until": "2025-05-25"
+                    "from": "2026-05-24",
+                    "until": "2026-05-25"
                 }
             },
             {
                 "nightlyPrice": 450,
                 "dateRange": {
-                    "from": "2025-05-26",
-                    "until": "2025-05-31"
+                    "from": "2026-05-26",
+                    "until": "2026-05-31"
                 }
             },
             {
                 "nightlyPrice": 300,
                 "dateRange": {
-                    "from": "2025-06-01",
-                    "until": "2025-06-30"
+                    "from": "2026-06-01",
+                    "until": "2026-06-30"
                 }
             },
             {
                 "nightlyPrice": 365,
                 "dateRange": {
-                    "from": "2025-07-01",
-                    "until": "2025-07-10"
+                    "from": "2026-07-01",
+                    "until": "2026-07-10"
                 }
             },
             {
                 "nightlyPrice": 500,
                 "dateRange": {
-                    "from": "2025-07-11",
-                    "until": "2025-07-12"
+                    "from": "2026-07-11",
+                    "until": "2026-07-12"
                 }
             },
             {
                 "nightlyPrice": 365,
                 "dateRange": {
-                    "from": "2025-07-13",
-                    "until": "2025-07-17"
+                    "from": "2026-07-13",
+                    "until": "2026-07-17"
                 }
             },
             {
                 "nightlyPrice": 500,
                 "dateRange": {
-                    "from": "2025-07-18",
-                    "until": "2025-07-19"
+                    "from": "2026-07-18",
+                    "until": "2026-07-19"
                 }
             },
             {
                 "nightlyPrice": 365,
                 "dateRange": {
-                    "from": "2025-07-20",
-                    "until": "2025-07-24"
+                    "from": "2026-07-20",
+                    "until": "2026-07-24"
                 }
             },
             {
                 "nightlyPrice": 500,
                 "dateRange": {
-                    "from": "2025-07-25",
-                    "until": "2025-07-26"
+                    "from": "2026-07-25",
+                    "until": "2026-07-26"
                 }
             },
             {
                 "nightlyPrice": 365,
                 "dateRange": {
-                    "from": "2025-07-27",
-                    "until": "2025-07-31"
+                    "from": "2026-07-27",
+                    "until": "2026-07-31"
                 }
             },
             {
                 "nightlyPrice": 450,
                 "dateRange": {
-                    "from": "2025-08-01",
-                    "until": "2025-08-25"
+                    "from": "2026-08-01",
+                    "until": "2026-08-25"
                 }
             }
         ]
@@ -140,7 +140,7 @@
                 },
                 {
                     "chargeMode": "of_rent",
-                    "name": "Ala test 11.03.2025",
+                    "name": "Ala test 11.03.2026",
                     "kind": "other",
                     "productCode": "76",
                     "includeInRent": false,
@@ -149,7 +149,7 @@
                 },
                 {
                     "chargeMode": "of_rent",
-                    "name": "Ala test 16.03.2025",
+                    "name": "Ala test 16.03.2026",
                     "kind": "other",
                     "productCode": "77",
                     "includeInRent": false,
@@ -158,7 +158,7 @@
                 },
                 {
                     "chargeMode": "of_rent",
-                    "name": "AlaTest 17.03.2025",
+                    "name": "AlaTest 17.03.2026",
                     "kind": "other",
                     "productCode": "78",
                     "includeInRent": false,

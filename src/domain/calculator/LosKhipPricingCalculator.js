@@ -63,14 +63,13 @@ class LosKhipPricingCalculator extends AbstractKhipPricingCalculator {
             start: realStartDate,
             end: realEndDate,
             nightlyRate: averageRate,
-            reliability: 'estimated',
         }];
     }
 
     /**
      * Compute the base rates from the payload's LoS records
      *
-     * @returns Object array of base rates with start, end, nightlyRate, and reliability
+     * @returns Object array of base rates with start, end, and nightlyRate
      */
     getBaseRates() {
         // guard clause - no LoS records
